@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Schema, model, Types } from 'mongoose';
+import bcrypt from 'bcrypt';
 
 // Declare the Schema of the Mongo model
 
@@ -85,6 +86,13 @@ const userSchema = new mongoose.Schema<IUser>(
     timestamps: true
   }
 );
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
 
 //Export the model
 const User = model<IUser>('User', userSchema);
