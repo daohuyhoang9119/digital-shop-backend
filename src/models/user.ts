@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Schema, model, Types } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { getEffectiveTypeParameterDeclarations } from 'typescript';
 
 // Declare the Schema of the Mongo model
 
@@ -10,10 +11,12 @@ export interface IUser {
   email: string;
   mobile: string;
   password: string;
+  address: string[];
   role: string;
   cart: CartItems[];
-  address: string[];
   wishList: string[];
+  createdAt: Date;
+  updatedAt: Date;
   isBlocked: boolean;
   refreshToken: string;
   passwordChangedAt: string;
@@ -67,6 +70,12 @@ const userSchema = new mongoose.Schema<IUser>(
     isBlocked: {
       type: Boolean,
       default: false
+    },
+    createdAt: {
+      type: Date
+    },
+    updatedAt: {
+      type: Date
     },
     refreshToken: {
       type: String

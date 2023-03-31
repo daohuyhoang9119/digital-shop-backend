@@ -86,6 +86,31 @@ export const getUserById = asyncHandler(async (req: any, res: any) => {
   }
 });
 
+export const updateUserById = asyncHandler(async (req: any, res: any) => {
+  const user = await User.findById(req.params.id);
+  const { firstName, lastName, email, mobile, password, address } = req.body;
+  if (user) {
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.email = email || user.email;
+    user.mobile = mobile || user.mobile;
+    await user.save();
+    return res.status(200).json({
+      message: `User has been updated ✏️`,
+      data: user
+    });
+  } else {
+    res.status(400);
+    throw new Error('user not found!');
+  }
+});
+// firstName: string;
+//   lastName: string;
+//   email: string;
+//   mobile: string;
+//   password: string;
+//   address: string[];
+
 export const deleteUser = asyncHandler(async (req: any, res: any) => {
   const user = await User.findById(req.params.id);
   //delete user
