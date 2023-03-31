@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import User from '../models/user';
 import bcrypt from 'bcrypt';
+import { generateRefreshToken, generateToken } from '../middlewares/jwt';
 
 export const register = asyncHandler(async (req: any, res: any) => {
   const { firstName, lastName, email, password } = req.body;
@@ -24,22 +25,38 @@ export const register = asyncHandler(async (req: any, res: any) => {
 });
 
 export const login = asyncHandler(async (req: any, res: any) => {
-  const { email, password } = res.body;
+  const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: 'Login successfully 🫶'
+      message: 'Opps something went wrong'
     });
   }
   const user = await User.findOne({ email });
   if (user) {
     const match = await bcrypt.compare(password, user.password);
     if (match) {
+      const { password, role, ...response } = user.toObject();
+      const accessToken = generateToken(user.id, role);
+      const refreshToken = generateRefreshToken(user.id);
+      await User.findByIdAndUpdate(user.id, { refreshToken }, { new: true });
+
+      //save refresh token to cookie
+      const timeRefreshToken = 7 * 24 * 60 * 60 * 1000;
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        maxAge: timeRefreshToken
+      });
+
       res.status(200).json({
         success: true,
-        message: 'bla'
+        message: 'Congratulation. Login successfully 🫶',
+        data: response,
+        token: accessToken
       });
     }
+  } else {
+    throw new Error(`Invalid credentials😣`);
   }
 });
 
