@@ -1,7 +1,9 @@
 import asyncHandler from 'express-async-handler';
 import User from '../models/user';
 import bcrypt from 'bcrypt';
-import { generateRefreshToken, generateToken } from '../middlewares/jwt';
+import { generateAccessToken, generateRefreshToken } from '../middlewares/jwt';
+import jwt from 'jsonwebtoken';
+import { JwtPayload } from '../utils/interfaces/jwt_payload.interface';
 
 export const register = asyncHandler(async (req: any, res: any) => {
   const { firstName, lastName, email, password } = req.body;
@@ -37,13 +39,13 @@ export const login = asyncHandler(async (req: any, res: any) => {
     const match = await bcrypt.compare(password, user.password);
     if (match) {
       const { password, role, ...response } = user.toObject();
-      const accessToken = generateToken(user.id, role);
-      const refreshToken = generateRefreshToken(user.id);
-      await User.findByIdAndUpdate(user.id, { refreshToken }, { new: true });
+      const accessToken = generateAccessToken(user.id, role);
+      const newRefreshToken = generateRefreshToken(user.id);
+      await User.findByIdAndUpdate(user.id, { refreshToken: newRefreshToken }, { new: true });
 
       //save refresh token to cookie
       const timeRefreshToken = 7 * 24 * 60 * 60 * 1000;
-      res.cookie('refreshToken', refreshToken, {
+      res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
         maxAge: timeRefreshToken
       });
@@ -61,7 +63,7 @@ export const login = asyncHandler(async (req: any, res: any) => {
 });
 
 export const getAllUser = asyncHandler(async (req: any, res: any) => {
-  const users = await User.find();
+  const users = await User.find().select('-refreshToken ');
   if (users) {
     res.status(200).json({
       success: users ? true : false,
@@ -104,6 +106,7 @@ export const updateUserById = asyncHandler(async (req: any, res: any) => {
     throw new Error('user not found!');
   }
 });
+
 // firstName: string;
 //   lastName: string;
 //   email: string;
@@ -124,4 +127,22 @@ export const deleteUser = asyncHandler(async (req: any, res: any) => {
     res.status(400);
     throw new Error('User not found❓');
   }
+});
+
+export const refreshAccessToken = asyncHandler(async (req: any, res: any) => {
+  // Lấy token từ cookies
+  const cookie = req.cookies;
+  console.log('cookie:', cookie.refreshToken);
+  // Check xem có token hay không
+  if (!cookie && !cookie.refreshToken) throw new Error('No refresh token in cookies');
+  // Check token có hợp lệ hay không
+  jwt.verify(cookie?.refreshToken, process.env.JWT_SECRET!, async (err: any, decode: any) => {
+    const response = await User.findOne({ _id: decode.id, refreshToken: cookie.refreshToken });
+    return res.status(200).json({
+      success: response ? true : false,
+      newAccessToken: response ? generateAccessToken(response._id, response.role) : 'Refresh token not matched'
+    });
+  });
+  // const { id } = rs as JwtPayload;
+  // console.log('user:', user);
 });

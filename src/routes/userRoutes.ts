@@ -1,14 +1,24 @@
 import express from 'express';
-import { register, getAllUser, getUserById, deleteUser, login, updateUserById } from '../controllers/user';
+import {
+  register,
+  getAllUser,
+  getUserById,
+  deleteUser,
+  login,
+  updateUserById,
+  refreshAccessToken
+} from '../controllers/user';
+import { verifyAccessToken } from '../middlewares/auth';
 
 const router = express.Router();
 
 router.route('/register').post(register);
 router.route('/login').post(login);
+router.route('/refresh-token').post(refreshAccessToken);
+router.route('/').get(verifyAccessToken, getAllUser);
 router.route('/:id').post(getUserById);
 router.route('/:id').delete(deleteUser);
 router.route('/:id').put(updateUserById);
-router.route('/').get(getAllUser);
 export default router;
 
 //CRUD post get put delete

@@ -6,6 +6,7 @@ import { getEffectiveTypeParameterDeclarations } from 'typescript';
 // Declare the Schema of the Mongo model
 
 export interface IUser {
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
