@@ -1,22 +1,24 @@
 // Declare the Schema of the Mongo model
-import mongoose, { Types, model } from 'mongoose';
+import mongoose, { Schema, Types, model } from 'mongoose';
 type Review = {
   name: string;
   rating: number;
   comment: string;
-  user: Types.ObjectId;
+  postedBy: Types.ObjectId;
 };
 interface IProduct {
   title: string;
   slug: string;
   image: string;
   price: number;
-  category: string;
+  category: string[];
+  color: string;
   brand: string;
   description: string;
   quantity?: number;
+  sold: number;
   reviews: Review[];
-  // _id: string;
+  totalRating: number;
 }
 
 const productSchema = new mongoose.Schema<IProduct>(
@@ -38,9 +40,10 @@ const productSchema = new mongoose.Schema<IProduct>(
     price: {
       type: Number
     },
-    category: {
+    category: [{ type: mongoose.Types.ObjectId, ref: 'Category' }],
+    color: {
       type: String,
-      required: true
+      enum: ['Black', 'Red', 'Blue', 'White']
     },
     brand: {
       type: String,
@@ -51,16 +54,24 @@ const productSchema = new mongoose.Schema<IProduct>(
       required: true
     },
     quantity: {
-      type: String
+      type: String,
+      default: 0
+    },
+    sold: {
+      type: Number,
+      default: 0
     },
     reviews: [
       {
         name: String,
         rating: Number,
         comment: String,
-        user: Types.ObjectId
+        postedBy: { type: Types.ObjectId, ref: 'User' }
       }
-    ]
+    ],
+    totalRating: {
+      type: Number
+    }
   },
   {
     timestamps: true
