@@ -70,7 +70,8 @@ const productSchema = new mongoose.Schema<IProduct>(
       }
     ],
     totalRating: {
-      type: Number
+      type: Number,
+      default: 0
     }
   },
   {
