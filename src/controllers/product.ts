@@ -1,12 +1,33 @@
 import asyncHandler from 'express-async-handler';
 import Product from './../models/product';
 import slugify from 'slugify';
+import { query } from 'express';
 
 export const getAllProduct = asyncHandler(async (req: any, res: any) => {
-  const products = await Product.find({}).limit(12);
+  const products = await Product.find();
+  const queries = { ...req.queries };
+
+  const excludeFields = ['limit', 'sort', 'page', 'fields'];
+  excludeFields.forEach((el) => delete queries[el]);
+  const queryString = JSON.stringify(queries);
+  queryString.replace(/\b(gte|gt|lte|lt)\b/g, (el) => `$${el}`);
+
+  const formatedQueries = JSON.parse(queryString);
+
+  //filtering
+  if (queries?.title) {
+    formatedQueries.title = { $regex: queries.title, $options: 'i' };
+  }
+  const queryCommand = await Product.find(formatedQueries);
+
+  // queryCommand.exec();
+  //Execute querry
+  // queryCommand.exec(async (err: any, res: any) => {
+
+  // });
 
   if (products) {
-    res.status(200).json({
+    return res.status(200).json({
       status: products ? true : false,
       message: 'All products ⬇️',
       data: products
@@ -14,6 +35,31 @@ export const getAllProduct = asyncHandler(async (req: any, res: any) => {
   } else {
     res.status(500);
     throw new Error('products not found!');
+  }
+});
+
+export const getProductSearch = asyncHandler(async (req: any, res: any, next: any) => {
+  try {
+    // We destructure the req.query object to get the page and limit variables from url
+    const { page = 1, limit = 10 } = req.query;
+
+    const products = await Product.find({ ...req.query })
+      // We multiply the "limit" variables by one just to make sure we pass a number and not a string
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+
+      .sort({ createdAt: -1 });
+
+    // Getting the numbers of products stored in database
+    const count = await Product.countDocuments();
+    const productSearch = [id, slug, ...products];
+    return res.status(200).json({
+      products,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page
+    });
+  } catch (err) {
+    next(err);
   }
 });
 
