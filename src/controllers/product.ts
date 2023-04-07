@@ -40,19 +40,16 @@ export const getAllProduct = asyncHandler(async (req: any, res: any) => {
 
 export const getProductSearch = asyncHandler(async (req: any, res: any, next: any) => {
   try {
-    // We destructure the req.query object to get the page and limit variables from url
     const { page = 1, limit = 10 } = req.query;
 
     const products = await Product.find({ ...req.query })
-      // We multiply the "limit" variables by one just to make sure we pass a number and not a string
+
       .limit(limit * 1)
       .skip((page - 1) * limit)
 
       .sort({ createdAt: -1 });
 
-    // Getting the numbers of products stored in database
     const count = await Product.countDocuments();
-    const productSearch = [id, slug, ...products];
     return res.status(200).json({
       products,
       totalPages: Math.ceil(count / limit),
