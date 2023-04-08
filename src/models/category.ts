@@ -1,7 +1,5 @@
 import mongoose from 'mongoose';
 import { Schema, model, Types } from 'mongoose';
-import bcrypt from 'bcrypt';
-import { getEffectiveTypeParameterDeclarations } from 'typescript';
 
 // Declare the Schema of the Mongo model
 
