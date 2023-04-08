@@ -24,5 +24,5 @@ const categorySchema = new mongoose.Schema<ICategory>(
 );
 
 //Export the model
-const Category = model<ICategory>('User', categorySchema);
+const Category = model<ICategory>('Category', categorySchema);
 export default Category;
