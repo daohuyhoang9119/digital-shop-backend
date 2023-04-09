@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
+
 export const verifyAccessToken = asyncHandler(async (req: any, res: any, next) => {
   const { authorization } = req.headers;
   if (authorization && authorization.startsWith('Bearer')) {
