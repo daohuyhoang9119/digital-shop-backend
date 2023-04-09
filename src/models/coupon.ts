@@ -6,7 +6,7 @@ import { Schema, model, Types } from 'mongoose';
 export interface ICoupon {
   name: string;
   discount: number;
-  expriry: Date;
+  expiry: Date;
 }
 
 const couponSchema = new mongoose.Schema<ICoupon>(
@@ -15,13 +15,14 @@ const couponSchema = new mongoose.Schema<ICoupon>(
       type: String,
       required: true,
       unique: true,
-      index: true
+      index: true,
+      uppercase: true
     },
     discount: {
       type: Number,
       required: true
     },
-    expriry: {
+    expiry: {
       type: Date,
       required: true
     }
