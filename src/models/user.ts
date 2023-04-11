@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { Schema, model, Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { getEffectiveTypeParameterDeclarations } from 'typescript';
+import Product from './product';
 
 // Declare the Schema of the Mongo model
 
@@ -25,9 +26,8 @@ export interface IUser {
   passwordResetExpires: string;
 }
 type CartItems = {
-  name: string;
   qty: number;
-  image: string;
+  color: string;
 };
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -60,10 +60,9 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     cart: [
       {
-        name: { type: String, required: true },
         qty: { type: Number, required: true },
-        image: { type: String, required: true },
-        price: { type: Number, required: true }
+        color: { type: String, required: true },
+        product: { type: mongoose.Types.ObjectId, ref: 'Product' }
       }
     ],
     address: [{ type: mongoose.Types.ObjectId, ref: 'Address' }],

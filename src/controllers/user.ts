@@ -146,3 +146,47 @@ export const refreshAccessToken = asyncHandler(async (req: any, res: any) => {
   // const { id } = rs as JwtPayload;
   // console.log('user:', user);
 });
+
+export const updateCart = asyncHandler(async (req: any, res: any) => {
+  const { id } = req.user;
+  const { productId, qty, color } = req.body;
+  if (!productId || !qty || !color) {
+    throw new Error('Missing inputs');
+  }
+  const user = await User.findById(id).select('cart');
+
+  const alreadyProduct = user?.cart?.find((el: any) => el.product.toString() === productId);
+  if (alreadyProduct) {
+    if (alreadyProduct.color === color) {
+      const response = await User.updateOne(
+        { cart: { $elemMatch: alreadyProduct } },
+        { $set: { 'cart.$qty': qty } },
+        { new: true }
+      );
+      return res.status(200).json({
+        success: response ? true : false,
+        updateCart: response ? response : 'oops something went wrong'
+      });
+    } else {
+      const response = await User.findByIdAndUpdate(
+        id,
+        { $push: { cart: { product: productId, qty, color } } },
+        { new: true }
+      );
+      return res.status(200).json({
+        success: response ? true : false,
+        updateCart: response ? response : 'oops something went wrong'
+      });
+    }
+  } else {
+    const response = await User.findByIdAndUpdate(
+      id,
+      { $push: { cart: { product: productId, qty, color } } },
+      { new: true }
+    );
+    return res.status(200).json({
+      success: response ? true : false,
+      updateCart: response ? response : 'oops something went wrong'
+    });
+  }
+});
