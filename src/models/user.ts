@@ -13,7 +13,7 @@ export interface IUser {
   email: string;
   mobile: string;
   password: string;
-  address: string[];
+  address: string;
   role: string;
   cart: CartItems[];
   wishList: string[];
@@ -65,7 +65,10 @@ const userSchema = new mongoose.Schema<IUser>(
         product: { type: mongoose.Types.ObjectId, ref: 'Product' }
       }
     ],
-    address: [{ type: mongoose.Types.ObjectId, ref: 'Address' }],
+    address: {
+      type: String,
+      default: 'user HCM VN'
+    },
     wishList: [{ type: mongoose.Types.ObjectId, ref: 'Product' }],
     isBlocked: {
       type: Boolean,

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Mongoose } from 'mongoose';
 import { Schema, model, Types } from 'mongoose';
 import { EnumDeclaration } from 'typescript';
 
@@ -12,22 +12,23 @@ type CartItems = {
 };
 
 export interface IOrder {
-  title: string;
+  // title: string;
   status: string;
   orderBy: Types.ObjectId;
   cartItems: CartItems[];
   totalPrice: number;
   isPaid: boolean;
+  coupon: string[];
 }
 
 const orderSchema = new mongoose.Schema<IOrder>(
   {
-    title: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true
-    },
+    // title: {
+    //   type: String,
+    //   required: true,
+    //   unique: true,
+    //   index: true
+    // },
     status: {
       type: String,
       default: 'Processing',
@@ -56,6 +57,7 @@ const orderSchema = new mongoose.Schema<IOrder>(
       required: true,
       default: 0.0
     },
+    coupon: [{ type: [{ type: mongoose.Types.ObjectId, ref: 'Coupon' }] }],
     isPaid: {
       type: Boolean,
       required: true,

@@ -1,9 +1,11 @@
 import asyncHandler from 'express-async-handler';
 import Order from '../models/order';
 import User from '../models/user';
+import { model } from 'mongoose';
+import Product from '../models/product';
 
 export const getAllOrder = asyncHandler(async (req: any, res: any) => {
-  const orders = await Order.find();
+  const orders = await Order.find({});
   if (orders) {
     return res.status(200).json({
       status: orders ? true : false,
@@ -60,25 +62,46 @@ export const deleteOrder = asyncHandler(async (req: any, res: any) => {
     throw new Error(`Order not found!🙈`);
   }
 });
+// title: string;
+//   status: string;
+//   orderBy: Types.ObjectId;
+//   cartItems: CartItems[];
+//   totalPrice: number;
+//   isPaid: boolean;
+//   coupon: string[];
+
 export const addOrder = asyncHandler(async (req: any, res: any) => {
-  const { title } = req.body;
   const { id } = req.user;
-  //   if (Object.keys(req.body).length === 0) {
-  //     throw new Error('Missing input');
-  //   }
-  const userCart = await User.findById(id).select('cart');
-  // const order = new Order(req.body);
-  // if (order) {
-  //   const newOrder = await Order.create(req.body);
-  //   return res.status(200).json({
-  //     success: order ? true : false,
-  //     message: 'Great, you just have add 1 Order ❤️',
-  //     data: newOrder ? newOrder : `Cannot create a new Order 🤦‍♂️`
-  //   });
-  // } else {
-  //   res.status(500);
-  //   throw new Error('Orders not found!');
-  // }
+  const { coupon } = req.body;
+  const userCart = await User.findById(id)
+    .select('cart')
+    .populate({ path: 'cart.product', select: 'title price slug address', model: Product });
+  console.log(userCart);
+  // const product = userCart
+  // _id: new ObjectId("6425bceb49b4b9857d331431"),
+  // cart: [
+  //   {
+  //     qty: 2,
+  //     color: 'green',
+  //     product: [Object],
+  //     _id: new ObjectId("6434f6888e27ee6f34ca2858")
+  //   },
+  // const product  = userCart?.map(el =>({
+  //   product: el.product.id,
+
+  // }))
+  const cartItems = userCart?.cart?.map((el: any) => ({
+    name: el.title,
+    qty: el.qty
+  }));
+  // console.log(cartItems);
+
+  const response = await Order.create({
+    // orderBy: id,
+    // totalPrice,
+    // coupon,
+    // cartItems,
+  });
   return res.status(200).json({
     success: userCart ? true : false,
     message: 'Great, you just have add 1 Order ❤️',
