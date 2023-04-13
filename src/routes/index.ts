@@ -11,6 +11,7 @@ const initRoutes = (app: any) => {
   app.use('/api/category', categoryRoutes);
   app.use('/api/order', orderRoutes);
   app.use('/api/coupon', couponRoutes);
+  app.use('/api/wishlist', couponRoutes);
   app.use(notFound);
   app.use(errorHandler);
 };

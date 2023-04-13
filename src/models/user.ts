@@ -69,7 +69,7 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       default: 'user HCM VN'
     },
-    wishList: [{ type: mongoose.Types.ObjectId, ref: 'Product' }],
+    wishList: [{ product: { type: mongoose.Types.ObjectId, ref: 'Product' } }],
     isBlocked: {
       type: Boolean,
       default: false

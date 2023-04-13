@@ -107,13 +107,6 @@ export const updateUserById = asyncHandler(async (req: any, res: any) => {
   }
 });
 
-// firstName: string;
-//   lastName: string;
-//   email: string;
-//   mobile: string;
-//   password: string;
-//   address: string[];
-
 export const deleteUser = asyncHandler(async (req: any, res: any) => {
   const user = await User.findById(req.params.id);
   //delete user
@@ -189,4 +182,20 @@ export const updateCart = asyncHandler(async (req: any, res: any) => {
       updateCart: response ? response : 'oops something went wrong'
     });
   }
+});
+
+export const addWishListItem = asyncHandler(async (req: any, res: any) => {
+  const { id } = req.params;
+  const { productId } = req.body;
+  if (!productId) {
+    throw new Error('Missing inputs product ID');
+  }
+  const user = await User.findById(id).select('wishlist');
+  const alreadyProduct = user?.wishList?.find((el: any) => el.product.toString() === productId);
+  console.log('user', user);
+
+  return res.status(200).json({
+    success: alreadyProduct ? true : false,
+    updateCart: alreadyProduct ? alreadyProduct : 'oops something went wrong'
+  });
 });
