@@ -12,7 +12,7 @@ type CartItems = {
 };
 
 export interface IOrder {
-  // title: string;
+  title: string;
   status: string;
   orderBy: Types.ObjectId;
   cartItems: CartItems[];
@@ -23,12 +23,12 @@ export interface IOrder {
 
 const orderSchema = new mongoose.Schema<IOrder>(
   {
-    // title: {
-    //   type: String,
-    //   required: true,
-    //   unique: true,
-    //   index: true
-    // },
+    title: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true
+    },
     status: {
       type: String,
       default: 'Processing',
@@ -43,7 +43,7 @@ const orderSchema = new mongoose.Schema<IOrder>(
       {
         name: { type: String, required: true },
         qty: { type: Number, required: true },
-        image: { type: String, required: true },
+        image: { type: String },
         price: { type: Number, required: true },
         _id: {
           type: Schema.Types.ObjectId,

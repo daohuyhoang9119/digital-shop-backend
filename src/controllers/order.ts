@@ -32,19 +32,21 @@ export const getOrderById = asyncHandler(async (req: any, res: any) => {
   }
 });
 
-export const updateOrder = asyncHandler(async (req: any, res: any) => {
-  if (Object.keys(req.body).length === 0) {
-    throw new Error('Missing input');
+export const updateOrderStatus = asyncHandler(async (req: any, res: any) => {
+  const { id } = req.params;
+  console.log(id);
+  const { status } = req.body;
+  if (!status) {
+    throw new Error('Missing input status');
   }
-  const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
+  console.log(order);
   if (order) {
-    await order.save();
-    return res.status(200).json({
+    return res.json({
       success: order ? true : false,
       data: order ? order : `Oops, can't update Order 🤦‍♂️`
     });
   } else {
-    res.status(400);
     throw new Error('Order not found!');
   }
 });
@@ -62,49 +64,42 @@ export const deleteOrder = asyncHandler(async (req: any, res: any) => {
     throw new Error(`Order not found!🙈`);
   }
 });
-// title: string;
-//   status: string;
-//   orderBy: Types.ObjectId;
-//   cartItems: CartItems[];
-//   totalPrice: number;
-//   isPaid: boolean;
-//   coupon: string[];
 
 export const addOrder = asyncHandler(async (req: any, res: any) => {
   const { id } = req.user;
+  console.log('id user:', id);
   const { coupon } = req.body;
   const userCart = await User.findById(id)
     .select('cart')
     .populate({ path: 'cart.product', select: 'title price slug address', model: Product });
-  console.log(userCart);
-  // const product = userCart
-  // _id: new ObjectId("6425bceb49b4b9857d331431"),
-  // cart: [
-  //   {
-  //     qty: 2,
-  //     color: 'green',
-  //     product: [Object],
-  //     _id: new ObjectId("6434f6888e27ee6f34ca2858")
-  //   },
-  // const product  = userCart?.map(el =>({
-  //   product: el.product.id,
 
-  // }))
   const cartItems = userCart?.cart?.map((el: any) => ({
-    name: el.title,
+    _id: el.product._id,
+    name: el.product?.title,
+    price: el.product.price,
+    slug: el.product.slug,
+    color: el.color,
     qty: el.qty
   }));
-  // console.log(cartItems);
+  console.log('cart item', cartItems);
+  let totalMoney: any = userCart?.cart?.reduce((sum, el: any) => el?.product?.price * el.qty + sum, 0);
+  console.log(`total price:`, totalMoney);
+
+  if (coupon && totalMoney) {
+    totalMoney = Math.round((totalMoney * (1 - coupon / 100)) / 1000) * 1000;
+  }
 
   const response = await Order.create({
-    // orderBy: id,
-    // totalPrice,
-    // coupon,
-    // cartItems,
+    title: `Order by ${id}`,
+    orderBy: id,
+    totalPrice: totalMoney,
+    coupon,
+    cartItems
   });
+  console.log('response order completed:', response);
   return res.status(200).json({
-    success: userCart ? true : false,
+    success: response ? true : false,
     message: 'Great, you just have add 1 Order ❤️',
-    data: userCart ? userCart : `Cannot create a new Order 🤦‍♂️`
+    data: response ? response : `Cannot create a new Order 🤦‍♂️`
   });
 });
