@@ -30,7 +30,7 @@ export const deleteWishList = asyncHandler(async (req: any, res: any) => {
 });
 
 export const addWishList = asyncHandler(async (req: any, res: any) => {
-  const { title } = req.body;
+  const { title, image } = req.body;
   //   if (Object.keys(req.body).length === 0) {
   //     throw new Error('Missing input');
   //   }

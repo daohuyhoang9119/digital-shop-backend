@@ -1,6 +1,5 @@
 import mongoose, { Mongoose } from 'mongoose';
 import { Schema, model, Types } from 'mongoose';
-import { EnumDeclaration } from 'typescript';
 
 // Declare the Schema of the Mongo model
 type CartItems = {
